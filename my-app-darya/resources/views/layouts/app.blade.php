@@ -74,6 +74,36 @@
             color: #0071e3;
         }
 
+        .nav-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: #424245;
+            font-size: 13px;
+            font-family: inherit;
+            text-decoration: none;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .nav-button:hover {
+            color: #0071e3;
+            /* background-color: rgba(0, 113, 227, 0.08); */
+        }
+
+        .nav-button:active {
+            background-color: rgba(0, 113, 227, 0.15);
+        }
+
+        .nav-button:focus-visible {
+            outline: 2px solid #0071e3;
+            outline-offset: 2px;
+        }
+
         /* Основная часть */
 
         main {
@@ -351,10 +381,21 @@
             </a>
 
             <nav class="nav-links">
-                <a href="{{ route('about') }}">О нас</a>
-                <a href="{{ route('contacts') }}">Контакты</a>
-                <a href="{{ route('signin.create') }}">Регистрация</a>
-                <a href="{{ route('articles.index') }}">Новости</a>
+                @auth
+                    <a href="{{ route('about') }}">О нас</a>
+                    <a href="{{ route('contacts') }}">Контакты</a>
+                    <a href="{{ route('articles.index') }}">Новости</a>
+                    <form action="{{ route('logout') }}" method="POST" >
+                        @csrf
+                        <button type="submit" class="nav-button">
+                            Выйти
+                        </button>
+                    </form>
+
+                @else
+                    <a href="{{ route('signin') }}">Войти</a>
+                    <a href="{{ route('register') }}">Регистрация</a>
+                @endauth
             </nav>
 
         </div>

@@ -48,7 +48,24 @@ Route::get('/galery/{id}', [MainController::class, 'galery'])
 Route::get('/signin', [AuthController::class, 'create'])
     ->name('signin.create');
 
-Route::post('/signin', [AuthController::class, 'registration'])
-    ->name('signin.registration');
+Route::get('/register', [AuthController::class, 'registerForm'])
+    ->name('register');
 
-Route::resource('articles', ArticleController::class);
+Route::post('/register', [AuthController::class, 'registration'])
+    ->name('register.store');
+
+// Авторизация
+Route::get('/signin', [AuthController::class, 'loginForm'])
+    ->name('signin');
+
+Route::post('/signin', [AuthController::class, 'login'])
+    ->name('signin.login');
+
+// Выход
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
+
+// Защищённые маршруты
+Route::middleware('auth:sanctum')->group(function () {
+    Route::resource('articles', ArticleController::class);
+});
