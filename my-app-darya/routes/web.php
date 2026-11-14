@@ -51,5 +51,4 @@ Route::get('/signin', [AuthController::class, 'create'])
 Route::post('/signin', [AuthController::class, 'registration'])
     ->name('signin.registration');
 
-Route::get('/articles', [ArticleController::class, 'index'])
-    ->name('articles.index');
+Route::resource('articles', ArticleController::class);

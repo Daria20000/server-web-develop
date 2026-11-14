@@ -245,6 +245,57 @@
             color: white !important;
         }
 
+        /* Пагинация */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .pagination a,
+        .pagination span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            color: #1d1d1f;
+            background: #f5f5f7;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .pagination a:hover {
+            background: #e8e8ed;
+            transform: translateY(-1px);
+        }
+
+        .pagination .active span {
+            background: #0071e3;
+            color: #fff;
+        }
+
+        .pagination .disabled span {
+            color: #b5b5ba;
+            background: #fafafa;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            text-align: center;
+            color: #86868b;
+            font-size: 13px;
+            margin-top: 14px;
+        }
+
         /* Адаптация под телефоны */
 
         @media (max-width: 700px) {
