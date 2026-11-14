@@ -296,14 +296,14 @@
         <div class="navigation">
 
             <a href="{{ route('home') }}" class="logo">
-                Новости
+                Главная
             </a>
 
             <nav class="nav-links">
-                <a href="{{ route('home') }}">Главная</a>
                 <a href="{{ route('about') }}">О нас</a>
                 <a href="{{ route('contacts') }}">Контакты</a>
                 <a href="{{ route('signin.create') }}">Регистрация</a>
+                <a href="{{ route('articles.index') }}">Новости</a>
             </nav>
 
         </div>
