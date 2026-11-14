@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MainController;
 
 Route::get('/', function () {
     return view('home');
@@ -35,3 +36,9 @@ Route::get('/contacts', function () {
 
     return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
+
+Route::get('/', [MainController::class, 'index'])
+    ->name('home');
+
+Route::get('/galery/{id}', [MainController::class, 'galery'])
+    ->name('galery');
