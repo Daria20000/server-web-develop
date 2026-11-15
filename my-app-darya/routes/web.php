@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CommentController;
 
 Route::get('/', function () {
     return view('home');
@@ -68,4 +69,10 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Защищённые маршруты
 Route::middleware('auth:sanctum')->group(function () {
     Route::resource('articles', ArticleController::class);
+
+    Route::post('/articles/{article}/comments', [CommentController::class, 'store'])
+        ->name('comments.store');
+
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
+        ->name('comments.destroy');
 });

@@ -14,11 +14,13 @@
         Управление публикациями и новостными материалами.
     </p>
 
-    <div style="margin: 30px 0;">
-        <a href="{{ route('articles.create') }}" class="button">
-            + Добавить новость
-        </a>
-    </div>
+    @can('create', App\Models\Article::class)
+        <div style="margin: 30px 0;">
+            <a href="{{ route('articles.create') }}" class="button">
+                + Добавить новость
+            </a>
+        </div>
+    @endcan
 
     @if (session('success'))
         <div class="card" style="margin-bottom: 25px;">
@@ -44,23 +46,25 @@
                     <a href="{{ route('articles.show', $article) }}" class="button">
                         Открыть
                     </a>
+                    @can('update', $article)
+                        <a href="{{ route('articles.edit', $article) }}" class="button">
+                            Изменить
+                        </a>
+                    @endcan
+                    @can('delete', $article)
+                        <form action="{{ route('articles.destroy', $article) }}"
+                            method="POST"
+                            onsubmit="return confirm('Удалить эту новость?')">
 
-                    <a href="{{ route('articles.edit', $article) }}" class="button">
-                        Изменить
-                    </a>
+                            @csrf
+                            @method('DELETE')
 
-                    <form action="{{ route('articles.destroy', $article) }}"
-                          method="POST"
-                          onsubmit="return confirm('Удалить эту новость?')">
+                            <button type="submit" class="button">
+                                Удалить
+                            </button>
 
-                        @csrf
-                        @method('DELETE')
-
-                        <button type="submit" class="button">
-                            Удалить
-                        </button>
-
-                    </form>
+                        </form>
+                    @endcan
 
                 </div>
 
