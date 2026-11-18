@@ -11,7 +11,15 @@ class Comment extends Model
         'article_id',
         'user_id',
         'content',
+        'is_approved',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_approved' => 'boolean',
+        ];
+    }
 
     public function article(): BelongsTo
     {

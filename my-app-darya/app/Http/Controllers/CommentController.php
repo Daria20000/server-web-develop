@@ -27,7 +27,10 @@ class CommentController extends Controller
             'content' => $validated['content'],
         ]);
 
-        return back()->with('success', 'Комментарий успешно добавлен.');
+        return back()->with(
+            'success',
+            'Комментарий отправлен и ожидает модерации.'
+        );
     }
 
     /**
@@ -40,5 +43,37 @@ class CommentController extends Controller
         $comment->delete();
 
         return back()->with('success', 'Комментарий успешно удалён.');
+    }
+
+    public function moderation()
+    {
+        Gate::authorize('manage-comments');
+
+        $comments = Comment::with(['user', 'article'])
+            ->where('is_approved', false)
+            ->latest()
+            ->get();
+
+        return view('comments.moderation', compact('comments'));
+    }
+
+    public function approve(Comment $comment)
+    {
+        Gate::authorize('manage-comments');
+
+        $comment->update([
+            'is_approved' => true,
+        ]);
+
+        return back()->with('success', 'Комментарий одобрен.');
+    }
+
+    public function reject(Comment $comment)
+    {
+        Gate::authorize('manage-comments');
+
+        $comment->delete();
+
+        return back()->with('success', 'Комментарий отклонён и удалён.');
     }
 }

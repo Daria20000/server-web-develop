@@ -385,6 +385,11 @@
                     <a href="{{ route('about') }}">О нас</a>
                     <a href="{{ route('contacts') }}">Контакты</a>
                     <a href="{{ route('articles.index') }}">Новости</a>
+                    @if (auth()->user()->isModerator())
+                        <a href="{{ route('comments.moderation') }}">
+                            Модерация комментариев
+                        </a>
+                    @endif
                     <form action="{{ route('logout') }}" method="POST" >
                         @csrf
                         <button type="submit" class="nav-button">

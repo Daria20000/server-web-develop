@@ -66,7 +66,7 @@
 
         <p class="description">
             Обсуждение новости и мнения читателей.
-            Всего комментариев: {{ $article->comments->count() }}
+            Всего комментариев: {{ $article->comments->where('is_approved', true)->count() }}
         </p>
 
         {{-- Форма добавления комментария --}}
@@ -110,7 +110,7 @@
         {{-- Список комментариев --}}
         <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 15px;">
 
-            @forelse ($article->comments as $comment)
+            @forelse ($article->comments->where('is_approved', true) as $comment)
 
                 <div class="card">
 
