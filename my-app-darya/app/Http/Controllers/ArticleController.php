@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use App\Mail\NewArticleNotification;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class ArticleController extends Controller
 {
@@ -35,6 +38,7 @@ class ArticleController extends Controller
     }
 
     // CREATE: сохранение новой новости
+
     public function store(Request $request)
     {
         Gate::authorize('create', Article::class);
@@ -53,12 +57,25 @@ class ArticleController extends Controller
             'image.max' => 'Путь к изображению слишком длинный.',
         ]);
 
-        Article::create($validated);
+        // Сохраняем новую статью в базе данных
+        $article = Article::create($validated);
+
+        // Получаем всех пользователей с ролью moderator
+        $moderators = User::whereHas('role', function ($query) {
+            $query->where('name', 'moderator');
+        })->whereNotNull('email')->get();
+
+        // Отправляем уведомление каждому модератору
+        foreach ($moderators as $moderator) {
+            Mail::to($moderator->email)
+                ->send(new NewArticleNotification($article));
+        }
 
         return redirect()
             ->route('articles.index')
-            ->with('success', 'Новость успешно создана!');
+            ->with('success', 'Новость успешно создана, уведомление отправлено модератору!');
     }
+
 
     // UPDATE: отображение формы редактирования
     public function edit(Article $article)
