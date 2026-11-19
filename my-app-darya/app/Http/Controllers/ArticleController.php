@@ -10,27 +10,104 @@ use App\Events\NewArticleEvent;
 use App\Models\User;
 use App\Notifications\NewArticleDatabaseNotification;
 use Illuminate\Support\Facades\Notification;
-
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Comment;
 
 class ArticleController extends Controller
 {
     // READ: список новостей с пагинацией
+
+
     public function index()
     {
-        $articles = Article::latest()->paginate(5);
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 5;
+
+        // Кэшируем массив данных статей и общее количество
+        $cached = Cache::remember(
+            'articles_page_' . $page,
+            3600,
+            function () use ($page, $perPage) {
+                return [
+                    'items' => Article::latest()
+                        ->forPage($page, $perPage)
+                        ->get()
+                        ->toArray(),
+
+                    'total' => Article::count(),
+                ];
+            }
+        );
+
+        // Восстанавливаем модели из массива
+        $items = Article::query()->hydrate($cached['items']);
+
+        // Создаём объект пагинации
+        $articles = new LengthAwarePaginator(
+            $items,
+            $cached['total'],
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ]
+        );
 
         return view('articles.index', compact('articles'));
     }
 
+
+
     // READ: просмотр отдельной новости
-    public function show(Article $article)
+
+
+    public function show($id)
     {
-        $article->load([
-            'comments.user'
-        ]);
+        // Кэшируем данные статьи и её комментариев
+        $cached = Cache::rememberForever(
+            'article_' . $id,
+            function () use ($id) {
+                $article = Article::with('comments.user')
+                    ->findOrFail($id);
+
+                return [
+                    'article' => $article->getAttributes(),
+
+                    'comments' => $article->comments->map(function ($comment) {
+                        return [
+                            'attributes' => $comment->getAttributes(),
+                            'user' => $comment->user?->getAttributes(),
+                        ];
+                    })->all(),
+                ];
+            }
+        );
+
+        // Восстанавливаем модель статьи
+        $article = (new Article)->newFromBuilder($cached['article']);
+
+        // Восстанавливаем комментарии и их авторов
+        $comments = collect($cached['comments'])->map(function ($item) {
+            $comment = (new Comment)->newFromBuilder($item['attributes']);
+
+            if ($item['user']) {
+                $user = (new \App\Models\User)
+                    ->newFromBuilder($item['user']);
+
+                $comment->setRelation('user', $user);
+            }
+
+            return $comment;
+        });
+
+        $article->setRelation('comments', $comments);
 
         return view('articles.show', compact('article'));
     }
+
+
 
     // CREATE: отображение формы создания
     public function create()
@@ -63,6 +140,13 @@ class ArticleController extends Controller
         // Сохраняем статью в базе данных
         $article = Article::create($validated);
 
+        // Очищаем кэш всех страниц списка статей
+        $totalPages = (int) ceil(Article::count() / 5);
+
+        for ($page = 1; $page <= $totalPages; $page++) {
+            Cache::forget('articles_page_' . $page);
+        }
+
         // Получаем всех пользователей с ролью reader
         $readers = User::whereHas('role', function ($query) {
             $query->where('name', 'reader');
@@ -88,7 +172,6 @@ class ArticleController extends Controller
     }
 
 
-    // UPDATE: отображение формы редактирования
     public function edit(Article $article)
     {
         Gate::authorize('update', $article);
@@ -96,7 +179,6 @@ class ArticleController extends Controller
         return view('articles.edit', compact('article'));
     }
 
-    // UPDATE: сохранение изменений
     public function update(Request $request, Article $article)
     {
         Gate::authorize('update', $article);
@@ -117,6 +199,8 @@ class ArticleController extends Controller
 
         $article->update($validated);
 
+        Cache::flush();
+
         return redirect()
             ->route('articles.index')
             ->with('success', 'Новость успешно обновлена!');
@@ -128,6 +212,8 @@ class ArticleController extends Controller
         Gate::authorize('delete', $article);
 
         $article->delete();
+
+        Cache::flush();
 
         return redirect()
             ->route('articles.index')
