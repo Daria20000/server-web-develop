@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Jobs\VeryLongJob;
 use App\Events\NewArticleEvent;
+use App\Models\User;
+use App\Notifications\NewArticleDatabaseNotification;
+use Illuminate\Support\Facades\Notification;
+
 
 class ArticleController extends Controller
 {
@@ -58,6 +62,17 @@ class ArticleController extends Controller
 
         // Сохраняем статью в базе данных
         $article = Article::create($validated);
+
+        // Получаем всех пользователей с ролью reader
+        $readers = User::whereHas('role', function ($query) {
+            $query->where('name', 'reader');
+        })->get();
+
+        // Отправляем уведомления читателям
+        Notification::send(
+            $readers,
+            new NewArticleDatabaseNotification($article)
+        );
 
         NewArticleEvent::dispatch($article);
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('home');
@@ -75,6 +76,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
         ->name('comments.destroy');
+
+    // Открытие уведомления и переход к статье
+    Route::get('/notifications/{id}', [NotificationController::class, 'open'])
+        ->name('notifications.open');
 });
 
 // Модерация комментариев

@@ -95,10 +95,6 @@
             /* background-color: rgba(0, 113, 227, 0.08); */
         }
 
-        .nav-button:active {
-            background-color: rgba(0, 113, 227, 0.15);
-        }
-
         .nav-button:focus-visible {
             outline: 2px solid #0071e3;
             outline-offset: 2px;
@@ -368,6 +364,74 @@
                 align-items: flex-start;
             }
         }
+
+        .notifications-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .notifications-dropdown summary {
+            cursor: pointer;
+            list-style: none;
+        }
+        
+        .notifications-dropdown p {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .notifications-dropdown p:hover {
+            color: #0071e3;
+        }
+
+        .notifications-dropdown summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .notification-badge {
+            display: inline-block;
+            background: #0071e3;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 9px;
+            font-size: 12px;
+            margin-left: 4px;
+        }
+
+        .notifications-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 230px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            z-index: 1000;
+            padding: 8px 0;
+        }
+
+        .notifications-menu a,
+        .notifications-menu .no-notifications {
+            display: block;
+            padding: 10px 14px;
+            color: #333;
+            text-decoration: none;
+            white-space: normal;
+        }
+
+        .notifications-menu a:hover {
+            background: #f2f2f2;
+        }
+
+        .notifications-menu .no-notifications {
+            color: #888;
+        }
     </style>
 </head>
 
@@ -389,6 +453,33 @@
                             Модерация комментариев
                         </a>
                     @endif
+                    @php
+                        $unreadNotifications = auth()->user()->unreadNotifications;
+                    @endphp
+
+                    <details class="notifications-dropdown">
+                        <summary>
+                            <p>Уведомления</p>
+
+                            @if ($unreadNotifications->count() > 0)
+                                <span class="notification-badge">
+                                    {{ $unreadNotifications->count() }}
+                                </span>
+                            @endif
+                        </summary>
+
+                        <div class="notifications-menu">
+                            @forelse ($unreadNotifications as $notification)
+                                <a href="{{ route('notifications.open', $notification->id) }}">
+                                    {{ $notification->data['article_title'] ?? 'Новая статья' }}
+                                </a>
+                            @empty
+                                <span class="no-notifications">
+                                    Нет новых уведомлений
+                                </span>
+                            @endforelse
+                        </div>
+                    </details>
                     <form action="{{ route('logout') }}" method="POST" >
                         @csrf
                         <button type="submit" class="nav-button">
