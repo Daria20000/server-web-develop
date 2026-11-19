@@ -372,7 +372,6 @@
 </head>
 
 <body>
-
     <header>
         <div class="navigation">
 
@@ -414,7 +413,7 @@
         <div class="footer-content">
 
             <div>
-                <p>Студентка: Юрченко Дарья Сергеевна</p>
+                <p>Студент: Юрченко Дарья Сергеевна</p>
                 <p>Учебная группа: 257-321</p>
             </div>
 
@@ -422,6 +421,11 @@
 
         </div>
     </footer>
+    <div id="app">
+        <App />
+    </div>
+    
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </body>
 

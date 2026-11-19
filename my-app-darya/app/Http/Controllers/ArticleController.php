@@ -6,6 +6,7 @@ use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Jobs\VeryLongJob;
+use App\Events\NewArticleEvent;
 
 class ArticleController extends Controller
 {
@@ -57,6 +58,8 @@ class ArticleController extends Controller
 
         // Сохраняем статью в базе данных
         $article = Article::create($validated);
+
+        NewArticleEvent::dispatch($article);
 
         // Добавляем задание отправки письма в очередь
         VeryLongJob::dispatch($article);
