@@ -69,7 +69,8 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 // Защищённые маршруты
 Route::middleware('auth:sanctum')->group(function () {
-    Route::resource('articles', ArticleController::class);
+    Route::resource('articles', ArticleController::class)
+        ->middlewareFor('show', \App\Http\Middleware\TrackArticleViews::class);
 
     Route::post('/articles/{article}/comments', [CommentController::class, 'store'])
         ->name('comments.store');
