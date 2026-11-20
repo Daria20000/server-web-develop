@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Cache;
 
 class CommentController extends Controller
 {
@@ -27,6 +28,8 @@ class CommentController extends Controller
             'content' => $validated['content'],
         ]);
 
+        Cache::forget('article_' . $article->id);
+
         return back()->with(
             'success',
             'Комментарий отправлен и ожидает модерации.'
@@ -40,7 +43,11 @@ class CommentController extends Controller
     {
         Gate::authorize('manage-comments');
 
+        $articleId = $comment->article_id;
+
         $comment->delete();
+
+        Cache::forget('article_' . $articleId);
 
         return back()->with('success', 'Комментарий успешно удалён.');
     }
@@ -65,6 +72,8 @@ class CommentController extends Controller
             'is_approved' => true,
         ]);
 
+        Cache::forget('article_' . $comment->article_id);
+
         return back()->with('success', 'Комментарий одобрен.');
     }
 
@@ -72,7 +81,11 @@ class CommentController extends Controller
     {
         Gate::authorize('manage-comments');
 
+        $articleId = $comment->article_id;
+
         $comment->delete();
+
+        Cache::forget('article_' . $articleId);
 
         return back()->with('success', 'Комментарий отклонён и удалён.');
     }
